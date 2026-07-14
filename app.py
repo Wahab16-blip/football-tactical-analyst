@@ -902,8 +902,8 @@ elif page == "View Reports":
             st.markdown("---")
 
             # check if viewing a specific report
-            if "viewing report" in st.session_state:
-                report_data = st.session_state["viewing report"]
+            if "viewing_report" in st.session_state:
+                report_data = st.session_state["viewing_report"]
 
                 # back button
                 if st.button("⬅️ Back to Reports"):
