@@ -937,7 +937,7 @@ elif page == "View Reports":
                             st.caption(f"📅 {report['timestamp']}")
                         with col3:
                             if st.button("View Report", key=f"view_{i}"):
-                                st.session_date["viewing_report"] = report
+                                st.session_state["viewing_report"] = report
                                 st.rerun()
                         st.markdown("---")
 
