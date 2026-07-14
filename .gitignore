@@ -1,0 +1,5 @@
+.env
+.streamlit/secrets.toml
+squad.json
+reports.json
+__pycache__/

@@ -1,0 +1,123 @@
+STREAMLIT BASICS:
+─────────────────────────────────────────
+st.title("text")          → page title
+st.header("text")         → section header
+st.text_input("label")    → text field
+st.selectbox("label", options) → dropdown
+st.button("label")        → clickable button
+st.spinner("message")     → loading animation
+st.markdown("text")       → formatted text
+st.success("text")        → green success box
+st.error("text")          → red error box
+st.sidebar.xxx            → puts anything in sidebar
+
+SESSION STATE:
+─────────────────────────────────────────
+st.session_state["key"] = value  → store
+st.session_state["key"]          → retrieve
+if "key" not in st.session_state → check exists
+
+Use for: storing reports, form data, 
+         anything that needs to survive reruns
+
+
+STREAMLIT PATTERNS LEARNED TODAY:
+─────────────────────────────────────────
+st.rerun()          → force immediate rerun
+                    → use after setting session_state
+
+st.container()      → groups elements visually
+
+format_func=lambda  → customises selectbox display
+                    → format_func=lambda x: labels[x]
+
+st.session_state    → persists data between reruns
+                    → use like a dictionary
+                    → check: "key" in st.session_state
+                    → delete: del st.session_state["key"]
+
+SESSION STATE PATTERN FOR NAVIGATION:
+─────────────────────────────────────────
+# set state → rerun → check state at top
+if st.button("View"):
+    st.session_state["viewing"] = item
+    st.rerun()
+
+if "viewing" in st.session_state:
+    # show full view
+else:
+    # show list view
+
+
+STREAMLIT ARCHITECTURE:
+─────────────────────────────────────────
+st.set_page_config()     → must be FIRST command
+st.sidebar.radio()       → navigation between pages
+st.columns(2)            → side by side layout
+st.session_state         → persists data between reruns
+st.rerun()               → force immediate page refresh
+st.spinner()             → loading animation
+st.markdown(unsafe_allow_html=True) → renders HTML/CSS
+
+PAGE ROUTING PATTERN:
+─────────────────────────────────────────
+page = st.sidebar.radio("Nav", ["Page1", "Page2"])
+
+if page == "Page1":
+    # page 1 content
+elif page == "Page2":
+    # page 2 content
+
+VIEWING PATTERN (list → detail):
+─────────────────────────────────────────
+# List view
+if "viewing_item" not in st.session_state:
+    for item in items:
+        if st.button("View", key=f"view_{i}"):
+            st.session_state["viewing_item"] = item
+            st.rerun()
+
+# Detail view
+else:
+    if st.button("← Back"):
+        del st.session_state["viewing_item"]
+        st.rerun()
+    # show full detail
+
+
+
+STREAMLIT TABS:
+─────────────────────────────────────────
+tab1, tab2 = st.tabs(["Tab 1", "Tab 2"])
+
+with tab1:
+    # tab 1 content
+with tab2:
+    # tab 2 content
+
+st.expander("Title", expanded=True):
+─────────────────────────────────────────
+with st.expander("Click to expand"):
+    # hidden content shown on click
+→ expanded=True means open by default
+→ great for showing multiple formation cards
+
+DYNAMIC COLUMNS BASED ON DATA:
+─────────────────────────────────────────
+relevant = POSITION_ABILITIES[position]
+cols = st.columns(len(relevant))
+for i, item in enumerate(relevant):
+    with cols[i]:
+        st.selectbox(item, options, key=f"key_{i}")
+→ number of columns adapts to position
+
+
+Both tabs render simultaneously —
+not just the active one.
+This means widget keys must be 
+unique ACROSS all tabs, not just 
+within each tab.
+
+Prefix convention:
+Tab 1 widgets → key="tab1_..."
+Tab 2 widgets → key="tab2_..."
