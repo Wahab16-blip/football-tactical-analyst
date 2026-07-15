@@ -121,3 +121,87 @@ within each tab.
 Prefix convention:
 Tab 1 widgets → key="tab1_..."
 Tab 2 widgets → key="tab2_..."
+
+
+FASTAPI BASICS:
+─────────────────────────────────────────
+@app.get("/route")    → handles GET requests
+@app.post("/route")   → handles POST requests
+async def            → async function (FastAPI preferred)
+
+Return a dict → automatically becomes JSON response
+
+PYDANTIC MODELS:
+─────────────────────────────────────────
+class MyModel(BaseModel):
+    field: str           → required string
+    field: int           → required integer
+    field: str = "default" → optional with default
+
+FastAPI validates incoming data automatically
+Wrong type → 422 Unprocessable Entity error
+
+HTTP STATUS CODES:
+─────────────────────────────────────────
+200 → success
+400 → bad request (client's fault)
+422 → validation error (wrong data type)
+500 → server error (your code's fault)
+404 → not found
+
+raise HTTPException(status_code=400, detail="message")
+→ returns error response with that status code
+
+
+FASTAPI PATTERN:
+─────────────────────────────────────────
+@app.get("/route")     → GET endpoint
+@app.post("/route")    → POST endpoint
+async def function(request: Model) → handler
+return dict            → automatic JSON response
+
+PYDANTIC VALIDATION:
+─────────────────────────────────────────
+class Model(BaseModel):
+    field: str              → required
+    field: str = "default"  → optional
+    field: List[OtherModel] → nested models
+
+FastAPI validates automatically:
+→ wrong type → 422 error
+→ missing required field → 422 error
+→ your custom check → 400 error
+
+CALLING YOUR OWN API FROM STREAMLIT:
+─────────────────────────────────────────
+response = requests.post(
+    "http://localhost:8000/endpoint",
+    json=data_dict,
+    timeout=120
+)
+if response.status_code == 200:
+    result = response.json()["key"]
+
+Always handle:
+→ ConnectionError → API not running
+→ Timeout → taking too long
+→ Non-200 status → API returned error
+
+TWO SERVERS PATTERN:
+─────────────────────────────────────────
+Terminal 1: python api.py      → port 8000
+Terminal 2: streamlit run app.py → port 8501
+Both must run simultaneously
+Streamlit calls FastAPI via HTTP requests
+
+
+
+
+
+
+
+
+
+
+
+

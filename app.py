@@ -668,12 +668,34 @@ if page == "New Report":
 
             with st.spinner("⚽ Generating tactical report..."):
                 try:
-                    report = generate_report(match_context)
-                    st.session_state["report"] = report
-                    st.session_state["match_context"] = match_context
-                    st.session_state["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+                    api_response = requests.post(
+                        "http://localhost:8000/analyse",
+                        json={
+                            "team": match_context["team"],
+                            "opposition": match_context["opposition"],
+                            "venue": match_context["venue"],
+                            "league": match_context["league"],
+                            "players": match_context["players"],
+                            "opp_formation": match_context["opp_formation"],
+                            "opp_notes": match_context.get("opp_notes", "")
+                        },
+                        timeout=120
+                    )
+
+                    if api_response.status_code == 200:
+                        report = api_response.json()["report"]
+                        st.session_state["report"] = report
+                        st.session_state["match_context"] = match_context
+                        st.session_state["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+                    else:
+                        st.error(f"API error: {api_response.json().get('detail', 'Unknown error')}")
+
+                except requests.exceptions.ConnectionError:
+                    st.error("Cannot connect to API. Make sure the API server is running on port 8000.")
+                except requests.exceptions.Timeout:
+                    st.error("Request timed out. The report is taking too long — try again.")
                 except Exception as e:
-                    st.error(f"Failed to generate report: {e}")
+                    st.error(f"Something went wrong: {e}")
 
     # display report if it exits
     if "report" in st.session_state:

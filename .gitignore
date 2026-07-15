@@ -5,3 +5,5 @@ reports.json
 __pycache__/
 *.pyc
 Week 4 notes.txt
+test.py
+*.py.bak
