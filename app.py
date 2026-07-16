@@ -668,6 +668,7 @@ if page == "New Report":
 
             with st.spinner("⚽ Generating tactical report..."):
                 try:
+                    # try API first
                     api_response = requests.post(
                         "http://localhost:8000/analyse",
                         json={
@@ -679,23 +680,20 @@ if page == "New Report":
                             "opp_formation": match_context["opp_formation"],
                             "opp_notes": match_context.get("opp_notes", "")
                         },
-                        timeout=120
+                        timeout=5
                     )
-
                     if api_response.status_code == 200:
                         report = api_response.json()["report"]
-                        st.session_state["report"] = report
-                        st.session_state["match_context"] = match_context
-                        st.session_state["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M")
                     else:
-                        st.error(f"API error: {api_response.json().get('detail', 'Unknown error')}")
+                        report = generate_report(match_context)
 
-                except requests.exceptions.ConnectionError:
-                    st.error("Cannot connect to API. Make sure the API server is running on port 8000.")
-                except requests.exceptions.Timeout:
-                    st.error("Request timed out. The report is taking too long — try again.")
-                except Exception as e:
-                    st.error(f"Something went wrong: {e}")
+                except:
+                    # fall back to direct Claude call
+                    report = generate_report(match_context)
+
+                st.session_state["report"] = report
+                st.session_state["match_context"] = match_context
+                st.session_state["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     # display report if it exits
     if "report" in st.session_state:
