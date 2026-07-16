@@ -647,6 +647,10 @@ if page == "New Report":
     
     st.markdown("---")
 
+    fatigued = [p["name"] for p in players if p["condition"] != "Fit" and p["name"]]
+    if fatigued:
+        st.warning(f"⚠️ Players not at full fitness: {', '.join(fatigued)}")
+    
     #---- Generate Button ----
     if st.button("⚽ Generate Tactical Report", type="primary", key="generate_formations_btn"):
         # validate inputs
@@ -666,7 +670,10 @@ if page == "New Report":
                 "opp_notes": opp_notes
             }
 
-            with st.spinner("⚽ Generating tactical report..."):
+            with st.status("⚽ Generating tactical report...", expanded=True) as status:
+                st.write("☁️ Checking weather conditions...")
+                st.write("📚 Searching tactical knowledge base...")
+                st.write("🧠 Claude is analysing your squad...")
                 try:
                     # try API first
                     api_response = requests.post(
@@ -694,11 +701,13 @@ if page == "New Report":
                 st.session_state["report"] = report
                 st.session_state["match_context"] = match_context
                 st.session_state["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+                status.update(label="✅ Report ready!", state="complete")
 
     # display report if it exits
     if "report" in st.session_state:
         st.markdown("---")
         st.subheader("📊 Tactical Report")
+        st.caption(f"Generated: {st.session_state['timestamp']}")
         st.markdown(st.session_state["report"])
 
         # formation display
@@ -911,12 +920,15 @@ elif page == "View Reports":
 
     if not os.path.exists("reports.json"):
         st.info("No reports saved yet. Generate your first tactical report.")
+        st.info("Click 'New Report' in the sidebar to get started.")
+        
     else:
         with open("reports.json", "r", encoding="utf-8") as f:
             reports = json.load(f)
 
         if not reports:
-            st.info("No reports save yet.")
+            st.info("No reports saved yet. Generate your first tactical analysis.")
+            st.info("Click 'New Report' in the sidebar to get started.") 
         else:
             st.markdown(f"**{len(reports)} report(s) saved.**")
             st.markdown("---")
